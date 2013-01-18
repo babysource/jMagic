@@ -558,7 +558,11 @@
 				}
 	};
 	
-	var _CHARSET = {'' : '**', '@GBK' : '**', '@UTF-8' : '***'}, _W3SVGNS = {prefix : '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">', suffix : '</svg>'}, _LOCATOR = {
+	var _CHARSET = {'' : '**', '@GBK' : '**', '@UTF-8' : '***'}, _W3SVGNS = {prefix : '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">', suffix : '</svg>'}, _ANIMATE = function(){
+		return this.requestAnimationFrame || this.webkitRequestAnimationFrame || this.mozRequestAnimationFrame || this.oRequestAnimationFrame || this.msRequestAnimationFrame || $Util.bind(this, function(frame) {
+			$Thread.delay.call(this, frame, 1000 / 60);
+		});
+	}, _LOCATOR = {
 		opt : function(){
 			return !this ? {
 				   	   maximumAge : 0,
@@ -735,7 +739,7 @@
 												svg = ctx.createContextualFragment(htm);
 											}catch(e){
 												try{
-													(svg = doc.createDocumentFragment(true)).appendChild(dna.cloneNode()).outerHTML = htm;
+													(svg = doc.createDocumentFragment(true)).appendChild(dna.cloneNode(false)).outerHTML = htm;
 												}catch(e){svg = $Array.clear(arr)}
 											}finally{
 												if(svg = ((svg.childNodes || 0)[0] || 0).childNodes)
@@ -750,6 +754,10 @@
 							 }
 						 }
 		 			},
+		anime:		function(fun,arg){
+						if($Match.isFunction(fun))
+							_ANIMATE.call($Util.getWin(this))($Util.bind(arg,fun));
+					},
 		wheel:		function(obj,fun){
 						if($Match.isFunction(fun)){
 							return {
@@ -1008,16 +1016,16 @@
 							};
 						},
 		format:			function(fmt,arr){
-							return String(fmt).replace(rex.FMT, function(reg,num){
-								return arr[num - 1] || '';
+							return $Parse.toTxt(fmt).replace(rex.FMT,function(reg,num){
+								return $Parse.toTxt(arr[num - 1]) || '';
 							});
 						},
 		padded:			function(obj,len,pad,fun){
 							return function(num){
 								return num > 0 && $Match.isFunction(fun) ? fun.call(
-									$Parse.toTxt(obj), Array(num + 1).join(pad)
-								) : $Parse.toTxt(obj);
-							}(len - $Parse.toTxt(obj).length);
+									obj, Array(num + 1).join(pad)
+								) : obj;
+							}(len - (obj = $Parse.toTxt(obj)).length);
 						},
 		getDocSize:		function(obj){
 							return (function(html,root,body,doce){
@@ -1108,13 +1116,13 @@
 								else
 									return function(key){
 										return $Browser.ie ? (
-											key == 1 ? 1 : (
-											key == 2 ? 3 : (
-											key == 4 ? 2 : 0
+											key === 1 ? 1 : (
+											key === 2 ? 3 : (
+											key === 4 ? 2 : 0
 										))) : (
-											key == 0 ? 1 : (
-											key == 2 ? 3 : (
-											key == 1 ? 2 : 0
+											key === 0 ? 1 : (
+											key === 2 ? 3 : (
+											key === 1 ? 2 : 0
 										)));
 									}(evt.button);
 							}else return null;
@@ -1132,14 +1140,12 @@
 							) : {e:evt,src:evt.target};
 						},
 		getMouse:		function(evt){
-							return (function(obj,htm,web){
-								if(obj && (htm = this.documentElement) && (web = this.body))
-									return {
-										x: obj.clientX + ((htm || 0).scrollLeft || (web || 0).scrollLeft || 0) - (htm.clientLeft || 0),
-										y: obj.clientY + ((htm || 0).scrollTop  || (web || 0).scrollTop  || 0) - (htm.clientTop  || 0)
-									};
-								else return null;
-							}).call($Util.getDoc(this),$Util.getEvent.call(this,evt).e);
+							return (evt = $Util.getEvent.call(this,evt)) ? (function(htm,web){
+								return {
+									x : this.clientX + ((htm || 0).scrollLeft || (web || 0).scrollLeft || 0) - ((htm || 0).clientLeft || (web || 0).clientLeft || 0),
+									y : this.clientY + ((htm || 0).scrollTop  || (web || 0).scrollTop  || 0) - ((htm || 0).clientTop  || (web || 0).clientTop  || 0)
+								};
+							}).call(evt.e, (evt = $Util.getDoc(this)).documentElement, evt.body) : null;
 						},
 		setMouse:		function(obj,src){
 							return !!(obj.style.cursor = ($Match.isUrl(src) ? 'url(' + src + '), auto' : src));
@@ -1636,7 +1642,7 @@
 						return Array.prototype.push.apply(arr,$Array.slice(arguments,1));
 					},
 		each: 		function(arr,fun,arg){
-						if(!$Match.isDefined(arr.length)){
+						if(!$Match.isDefined((arr || 0).length)){
 							for(var i in arr){
 								if ((fun || 0).call(
 									arg || arr[i], arr[i], i, arr
