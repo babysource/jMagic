@@ -630,7 +630,7 @@
 							}catch(e){
 								ctx = unf;
 							}finally{
-								$Thread.delay.call(this, $Util.bind($Array.splice(arr, 0, 300), function(timer,weber){
+								$Thread.delay.call(this, $Util.bind($Array.splice(arr, 0, 100), function(timer,weber){
 									try{
 										obj.insertAdjacentHTML('BeforeEnd', (
 											htm = $Array.join(this, '')
@@ -643,7 +643,7 @@
 										}catch(e){$Array.clear(arr)}
 									}finally{
 										arr.length ? $Thread.delay.call(weber, $Util.bind($Array.splice(arr, 0, 300), arguments.callee), 0, weber) : (
-											$Match.isFunction(fun) ? fun.call(arg || obj, obj) : timer.abort()
+											((ctx = htm = null) || $Match.isFunction(fun)) ? fun.call(arg || obj, obj) : timer.abort()
 										);
 									}
 								}), 0, this);
@@ -729,7 +729,7 @@
 							 }catch(e){
 								 ctx = unf;
 							 }finally{
-								$Thread.delay.call(this, $Util.bind($Array.splice(arr, 0, 300), function(timer,weber){
+								$Thread.delay.call(this, $Util.bind($Array.splice(arr, 0, 100), function(timer,weber){
 									if(rex.VML.test(htm = $Array.join(this, '')) && $Support.graphic.vml){
 										obj.insertAdjacentHTML('BeforeEnd', htm);
 									}else{
@@ -740,7 +740,7 @@
 											}catch(e){
 												try{
 													(svg = doc.createDocumentFragment(true)).appendChild(dna.cloneNode(false)).outerHTML = htm;
-												}catch(e){svg = $Array.clear(arr)}
+												}catch(e){$Array.clear(arr)}
 											}finally{
 												if(svg = ((svg.childNodes || 0)[0] || 0).childNodes)
 													while(svg.length){obj.appendChild(svg[0])}
@@ -748,7 +748,7 @@
 										}
 									}
 									arr.length ? $Thread.delay.call(weber, $Util.bind($Array.splice(arr, 0, 300), arguments.callee), 0, weber) : (
-										$Match.isFunction(fun) ? fun.call(arg || obj, obj) : timer.abort()
+										((ctx = svg = htm = null) || $Match.isFunction(fun)) ? fun.call(arg || obj, obj) : timer.abort()
 									);
 								}), 0, this);
 							 }
@@ -906,9 +906,7 @@
 							try{
 								node = node.firstChild
 							}catch(e){node = null}finally{
-								return !$Match.equal(node,null) ? (
-									!$Match.isDom(node) ? $Dom.getNext(node) : node
-								) : null;
+								return !$Match.isDom(node) ? $Dom.getNext(node) : node;
 							}
 						},
 		getPrev:		function(node){
@@ -929,9 +927,7 @@
 							try{
 								node = node.lastChild
 							}catch(e){node = null}finally{
-								return !$Match.equal(node,null) ? (
-									!$Match.isDom(node) ? $Dom.getPrev(node) : node
-								) : null;
+								return !$Match.isDom(node) ? $Dom.getPrev(node) : node;
 							}
 						},
 		insertAfter: 	function(node,elem){
@@ -1625,9 +1621,9 @@
 		map:		function(arr,fun,arg){
 						var ret = [];
 						try{
-							$Array.each(arr,function(obj,ind){
+							$Array.each(arr,function(obj,idx){
 								$Array.push(ret,fun.call(
-									arg || obj, obj, ind, arr
+									arg || obj, obj, idx, arr
 								));
 							});
 						}catch(e){return []} return ret;
@@ -1659,8 +1655,8 @@
 		grep:		function(arr,fun,inv){
 						var ret = [];
 						try{
-							$Array.each(arr,function(obj,ind){
-								if(!inv !== !fun(obj,ind))
+							$Array.each(arr,function(obj,idx){
+								if(!inv !== !fun(obj,idx))
 									$Array.push(ret,obj);
 							});
 						}catch(e){return []} return ret;
@@ -1673,9 +1669,9 @@
 		index:    	function(arr,itm){
 						var ret = -1;
 						try{
-							$Array.each(arr,function(obj,ind){
+							$Array.each(arr,function(obj,idx){
 								if($Match.equal(obj,itm))
-									return (ret = ind) && false;
+									return (ret = idx) && false;
 							});
 						}catch(e){return -1} return ret;
 					},
@@ -1691,8 +1687,8 @@
 							}catch(e){return []} return ret;
 						}
 					},
-		slice:		function(arr,ind,len){
-						return Array.prototype.slice.call(arr,ind,len || arr.length);
+		slice:		function(arr,idx,len){
+						return Array.prototype.slice.call(arr,idx,len || arr.length);
 					},
 		merge:		function(arr){
 						try{
@@ -1714,7 +1710,7 @@
 		clear: 		function(arr) {
 						try{
 							arr.length = 0;
-						}catch(e){return []} return arr;
+						}catch(e){return false} return true;
 					},
 		unique: 	function(arr){
 						var i = 0, j = 0;
@@ -1737,19 +1733,18 @@
 						return Array.prototype.splice.apply(arr,$Array.slice(arguments,1));
 					},
 		remove:     function(arr,itm){
+						var ret = -1;
 						try{
-							$Array.each(arr,function(obj,ind){
+							$Array.each(arr,function(obj,idx){
 								if($Match.equal(obj,itm))
-									return $Array.splice(arr,ind) && false;
+									return $Array.splice(arr,ret = idx,1).length < 1;
 							});
-						}catch(e){return []} return arr;
+						}catch(e){return -1} return ret;
 					},
-		replace:	function(arr,ind,obj){
+		replace:	function(arr,idx,obj){
 						try{
-							if((ind = $Parse.toNum(ind)) >= 0){
-								arr[ind] = obj;
-							}
-						}catch(e){return []} return arr;
+							return (idx = $Parse.toNum(idx)) >= 0 ? $Array.pop($Array.splice(arr,idx,1,obj)) : unf;
+						}catch(e){return unf}
 					},
 		reverse:	function(arr){
 						return Array.prototype.reverse.call(arr);
