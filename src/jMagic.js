@@ -10,7 +10,7 @@
  ******************************************************************************/
 (function(win,unf){
 	
-	var doc = win.document, nav = win.navigator, dna = doc.createElement('div'), rex = {
+	var doc = win.document, nav = win.navigator, dna = doc.createElement('div'), fps = 1000 / 60, rex = {
 		URL : /^(((HT|F)TPS?:\/)?\/|(\.+\/)*)[\w\-]+([:\.\/][\w\-]+)*\/?(\?(\w+(=[^\s]*)?&?)+)?(#\w*)?$/i,
 		PCT : /%/,
 		DOM : /^1|9$/,
@@ -19,10 +19,13 @@
 		ZIP : /^\d{6}$/i,
 		VML : /<\/?v:.+/i,
 		FMT : /\$([1-9]\d*)/g,
-		INT : /^[+\-]?[1-9]\d*$/,
-		FLT : /^[+\-]?\d+\.\d+$/,
-		NUM : /^[+\-]?\d+(\.\d*)?(e[+\-]?\d+)?$/i,
 		MAC : /^([0-9A-F]{2})(([:-][0-9A-F]{2}){5})$/i,
+		INT : {
+			INCL0 : /^[+\-]?\d+(e+[1-9]\d*)?$/i,
+			EXCL0 : /^[+\-]?[1-9]\d*(e+[1-9]\d*)?$/i
+		},
+		NUM : /^[+\-]?\d+(\.\d*)?(e[+\-]?[1-9]\d*)?$/i,
+		FLT : /^[+\-]?\d+(\.\d*(e-[1-9]\d*)?|e-[1-9]\d*)$/i,
 		WND : /([^;]*);([^;]*);([^;]+);([^;]+);([^;]+);([^;]+)/g,
 		JSN : {
 			SCRIPT : /^[\],:{}\s]*$/,
@@ -558,11 +561,7 @@
 				}
 	};
 	
-	var _CHARSET = {'' : '**', '@GBK' : '**', '@UTF-8' : '***'}, _W3SVGNS = {prefix : '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">', suffix : '</svg>'}, _ANIMATE = function(){
-		return this.requestAnimationFrame || this.webkitRequestAnimationFrame || this.mozRequestAnimationFrame || this.oRequestAnimationFrame || this.msRequestAnimationFrame || $Util.bind(this, function(frame) {
-			$Thread.delay.call(this, frame, 1000 / 60);
-		});
-	}, _LOCATOR = {
+	var _CHARSET = {'' : '**', '@GBK' : '**', '@UTF-8' : '***'}, _W3SVGNS = {prefix : '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">', suffix : '</svg>'}, _LOCATOR = {
 		opt : function(){
 			return !this ? {
 				   	   maximumAge : 0,
@@ -619,7 +618,24 @@
 			).call($Util.now())))
 				jsn.Failure.call(arg || run || err, err, run);
 		}
-	};
+	}, _ANIMATE = function(v, r, c){
+		var _RECYCLE = function(t){
+			return $Array.each(v, function(x){
+				return !(t = (this[x + c] || this[x + r]));
+			}, this) || t;
+		};
+		return function(){
+			var gcp = _RECYCLE.call(this);
+			return {
+				free : function(pid){
+					return $Match.isInt(pid, true) ? !gcp(pid) : pid;
+				},
+				play : $Util.bind(this, this.requestAnimationFrame || this.webkitRequestAnimationFrame || this.mozRequestAnimationFrame || this.oRequestAnimationFrame || this.msRequestAnimationFrame || function(fun){
+					return !!$Thread.delay.call(this, fun, fps);
+				})
+			};
+		};
+	}(['c', 'oC', 'msC', 'mozC', 'webkitC'], 'ancelRequestAnimationFrame', 'ancelAnimationFrame');
 	
 	var $Fx = jMagic.Fx = {
 		add:		function(obj,arr,fun,arg){
@@ -754,9 +770,21 @@
 							 }
 						 }
 		 			},
-		anime:		function(fun,arg){
-						if($Match.isFunction(fun))
-							_ANIMATE.call($Util.getWin(this))($Util.bind(arg,fun));
+		anime:		function(fun,num,arg){
+						return $Match.isFunction(fun) && (num = ($Match.isInt(num) ? num : fps)) ? function(swf, now, pid, run){
+							return (function(){
+								if(swf && swf.free(pid) && (pid = swf.play(arguments.callee)) >= 0 && ($Util.now() - now) >= num){
+									now = $Util.now();
+									try{
+										fun.call(arg || run, run);
+									}catch(e){
+										run.stop();
+									}
+								}
+							}).call(run = {stop : function(){
+								return swf ? swf.free(pid) && !(swf = now = pid = null) : true;
+							}}) || run;
+						}(_ANIMATE.call($Util.getWin(this)), $Util.now() - num, true) : unf;
 					},
 		wheel:		function(obj,fun){
 						if($Match.isFunction(fun)){
@@ -1499,11 +1527,13 @@
 		isNum:          function(num){
 							return !isNaN(num) && rex.NUM.test(num);
 						},
-		isInt:			function(num){
-							return !isNaN(num) && rex.INT.test(num);
-						},
 		isFlt:        	function(flt){
 							return !isNaN(flt) && rex.FLT.test(flt);
+						},
+		isInt:			function(num){
+							return !isNaN(num) && (
+								$Match.equal(arguments[1], true) ? rex.INT.INCL0.test(num) : rex.INT.EXCL0.test(num)
+							);
 						},
 		isZip:			function(zip){
 							return rex.ZIP.test(zip);
