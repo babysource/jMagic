@@ -1,7 +1,6 @@
 .DS_Store
 Thumbs.db
 /.idea
-/bin
 *.iml
 *.ipr
 *.iws
