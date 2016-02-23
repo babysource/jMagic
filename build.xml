@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="framework.build" basedir="." default="launch.run">
+
+    <property name="framework.src" location="src"/>
+    <property name="framework.lib" location="lib"/>
+    <property name="framework.bin" location="bin"/>
+
+    <property name="framework.compile.jar" location="${framework.lib}/compiler.jar"/>
+    <property name="framework.compress.jar" location="${framework.lib}/compressor.jar"/>
+
+    <!-- Del Dir -->
+    <target name="delete.dir">
+        <delete dir="${framework.bin}"/>
+    </target>
+
+    <!-- Add Dir -->
+    <target name="insert.dir">
+        <copy todir="${framework.bin}">
+            <dirset dir="${framework.src}"/>
+            <fileset dir="${framework.src}">
+                <include name="**/*.png"/>
+                <include name="**/*.gif"/>
+                <include name="**/*.htm"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <!-- CSS Compress -->
+    <target name="compress.css" depends="insert.dir">
+        <apply executable="java" parallel="false" failonerror="true">
+            <fileset dir="${framework.src}" includes="**/*.css"/>
+            <arg line="-jar"/>
+            <arg path="${framework.compress.jar}"/>
+            <arg line="--charset utf-8"/>
+            <srcfile/>
+            <arg line="-o"/>
+            <mapper type="glob" from="*.css" to="${framework.bin}/*.min.css"/>
+            <targetfile/>
+        </apply>
+    </target>
+
+    <!-- JSS Compress -->
+    <target name="compile.jss" depends="compress.css">
+        <apply executable="java" parallel="false" failonerror="true">
+            <fileset dir="${framework.src}" includes="**/*.js"/>
+            <arg line="-jar"/>
+            <arg path="${framework.compile.jar}"/>
+            <arg line="--charset utf-8"/>
+            <arg line="--js"/>
+            <srcfile/>
+            <arg line="--js_output_file"/>
+            <mapper type="glob" from="*.js" to="${framework.bin}/*.min.js"/>
+            <targetfile/>
+        </apply>
+    </target>
+
+    <!-- Run Compress -->
+    <target name="launch.run" depends="delete.dir,compile.jss"/>
+
+</project>

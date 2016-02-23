@@ -1,0 +1,145 @@
+﻿@charset "utf-8";
+
+* {
+    margin: 0;
+    padding: 0;
+    font-size: 12px;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+}
+
+.widgetWDiv {
+    position: absolute;
+    width: auto;
+    height: auto;
+    border: 1px solid #99bbe8;
+    overflow: hidden;
+    z-index: 99999999;
+}
+
+.widgetNDiv {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    border-width: 0;
+    background-color: #FFF;
+    overflow: auto;
+}
+
+.widgetHFrame {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    border-width: 0;
+    z-index: -1;
+}
+
+.ModalDialog {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    border-width: 0;
+    overflow: hidden;
+    z-index: 999999999;
+}
+
+.ModalDialog iframe.frameMask {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    border-width: 0;
+    opacity: .3;
+    filter: alpha(opacity=30);
+}
+
+.ModalDialog div.layerMask {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    border-width: 0;
+    background-color: #000;
+    overflow: hidden;
+    opacity: .3;
+    filter: alpha(opacity=30);
+}
+
+.ModalDialog div.modalWind {
+    position: absolute;
+    border-width: 0;
+    overflow: hidden;
+}
+
+div.modalWind ul.wind_head, div.modalWind ul.wind_body {
+    list-style: none;
+    clear: both;
+}
+
+div.modalWind ul.wind_head li.head_side {
+    width: 6px;
+    height: 25px;
+    background-repeat: no-repeat;
+    float: left;
+}
+
+div.modalWind ul.wind_head li.head_info {
+    height: 25px;
+    line-height: 25px;
+    color: #15428B;
+    background-repeat: repeat-x;
+    font-size: 12px;
+    font-weight: bolder;
+    text-align: left;
+    float: left;
+}
+
+div.modalWind ul.wind_head li.head_ctrl {
+    width: 36px;
+    height: 25px;
+    background-repeat: repeat-x;
+    float: left;
+}
+
+div.modalWind ul.wind_head li.head_ctrl input {
+    margin-top: 5px;
+    margin-left: 2px;
+    cursor: pointer;
+    float: left;
+}
+
+div.modalWind ul.wind_body {
+    border: 1px solid #93AAC6;
+    border-top-width: 0;
+    background-color: #C8D8EA;
+}
+
+div.modalWind ul.wind_body li.body_data {
+    margin-top: 0;
+    margin-left: 6px;
+    border: 1px solid #A3BAE9;
+    background-color: #FFF;
+    text-align: left;
+    overflow: auto;
+    float: left;
+    display: inline;
+}
+
+div.modalWind ul.wind_body li.body_data .body_data_href {
+    width: 100%;
+    height: 100%;
+    border-width: 0;
+    overflow: auto;
+    clear: both;
+}

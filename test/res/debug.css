@@ -1,0 +1,22 @@
+﻿@charset "utf-8";
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+#jmagic_dialog {
+    width: 180px;
+    height: 35px;
+    margin-top: 10px;
+    margin-left: 10px;
+}
+
+div._HoverDiv {
+    position: absolute;
+    top: 75px;
+    left: 10px;
+    width: 100px;
+    height: 100px;
+    border: 1px solid #000000;
+}
