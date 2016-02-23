@@ -1,0 +1,3 @@
+# JMagic
+
+Javascript Lite Framework
