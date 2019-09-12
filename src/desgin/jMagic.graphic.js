@@ -24,40 +24,65 @@
 			}, this);
 		};
 	}({
-		'thick' : function(){
-			this.thick = ($.Match.isInt(this.thick) ? this.thick : 1);
+		'thick': function(){
+			if(!$.Match.isInt(this.thick)){
+				this.thick = 1;
+			}
 		},
-		'alpha' : function(){
-			this.alpha = ($.Match.isInt(this.alpha) ? this.alpha : 100);
+		'alpha': function(){
+			if(!$.Match.isInt(this.alpha, true)){
+				if(!$.Match.isJsn(this.alpha)){
+					this.alpha = 100;
+				}else{
+					if(!$.Match.isInt(this.alpha.ctur, true)){
+						this.alpha.ctur = 100;
+					}
+					if(!$.Match.isInt(this.alpha.fill, true)){
+						this.alpha.fill = 100;
+					}
+				}
+			}
 		},
-		'slope' : function(){
-			this.slope = ($.Match.isNumber(this.slope) ? this.slope : false);
+		'slope': function(){
+			if(!$.Match.isNumber(this.slope)){
+				this.slope = false;
+			}
 		},
-		'matte' : function(){
-			this.matte = ($.Match.isBoolean(this.matte) ? this.matte : false);
+		'matte': function(){
+			if(!$.Match.isBoolean(this.matte)){
+				this.matte = false;
+			}
 		},
-		'arrow' : function(){
-			this.arrow = ($.Match.isBoolean(this.arrow) ? this.arrow : false);
+		'arrow': function(){
+			if(!$.Match.isBoolean(this.arrow)){
+				this.arrow = false;
+			}
 		},
-		'style' : function(){
+		'style': function(){
 			this.style = (_regex.style.test(this.style) ? this.style.toUpperCase() : 'SOLID');
 		},
-		'color' : function(){
+		'color': function(){
 			this.color = (_regex.color.test(this.color) ? this.color.toUpperCase() : '#FF0000');
 		},
-		'stuff' : function(){
+		'stuff': function(){
 			this.stuff = (_regex.color.test(this.stuff) ? this.stuff.toUpperCase() : (
 				this.stuff === true ? this.color : false
 			));
 		},
-		'angle' : function(){
-			this.angle = ($.Match.isNumber((this.angle || 0).f) && $.Match.isNumber((this.angle || 0).t) ? this.angle : null);
+		'angle': function(){
+			if(!($.Match.isNumber((this.angle || 0).f) && $.Match.isNumber((this.angle || 0).t))){
+				this.angle = null;
+			}
 		},
-		'extra' : function(){
-			this.extra = ($.Match.isNumber((this.extra || 0).x) && $.Match.isNumber((this.extra || 0).y) ? this.extra : null);
+		'extra': function(){
+			if(!($.Match.isNumber((this.extra || 0).x) && $.Match.isNumber((this.extra || 0).y))){
+				this.extra = null;
+			}
 		},
-		'point' : function(){
-			this.point = ($.Match.isNumber((this.point || 0).x) && $.Match.isNumber((this.point || 0).y) ? this.point : null);
+		'point': function(){
+			if(!($.Match.isNumber((this.point || 0).x) && $.Match.isNumber((this.point || 0).y))){
+				this.point = null;
+			}
 		}
 	}), _arith = {
 		/**
@@ -415,11 +440,13 @@
 											owner.svg2d.setAttribute('d', gpath);
 											owner.svg2d.setAttribute('stroke', this.color);
 											owner.svg2d.setAttribute('stroke-width', this.thick);
-											owner.svg2d.setAttribute('opacity', this.alpha / 100);
-											owner.svg2d.setAttribute('marker-end', this.arrow && gplug ? 'url(#' + owner.ident + ')' : '');
+											owner.svg2d.setAttribute('stroke-opacity', (
+												(!$.Match.isNum(this.alpha) ? this.alpha.ctur : this.alpha) / 100
+											));
 											owner.svg2d.setAttribute('stroke-dasharray', skill.styleTo(this.style, this.thick));
+											owner.svg2d.setAttribute('marker-end', this.arrow && gplug ? 'url(#' + owner.ident + ')' : '');
 										}else{
-											owner.run2d = !$.Fx.draw.call(wnd, scene, [$.Util.format(model.line, [gpath, owner.ident, this.color, this.thick, this.alpha / 100, skill.styleTo(this.style, this.thick), this.matte ? 'none' : ''])], function(){
+											owner.run2d = !$.Fx.draw.call(wnd, scene, [$.Util.format(model.line, [gpath, owner.ident, this.color, this.thick, (!$.Match.isNum(this.alpha) ? this.alpha.ctur : this.alpha) / 100, skill.styleTo(this.style, this.thick), this.matte ? 'none' : ''])], function(){
 												if(owner.svg2d = $.Array.pop($.Fn.css.call(scene, "." + owner.ident)))
 													$.Fx.draw.call(wnd, quote, [$.Util.format(model.mark, [owner.ident, this.color])], function(){
 														if(!(owner.run2d = false) && !this.matte && this.arrow && gplug)
@@ -481,10 +508,15 @@
 										);
 										if(owner.svg2d && !(owner.svg2d.style.display = (this.matte ? 'none' : ''))){
 											owner.svg2d.setAttribute('d', gpath);
-											owner.svg2d.setAttribute('opacity', this.alpha / 100);
-											owner.svg2d.setAttribute('stroke-width', this.thick);
-											owner.svg2d.setAttribute('stroke', this.color);
 											owner.svg2d.setAttribute('fill', this.stuff || 'none');
+											owner.svg2d.setAttribute('fill-opacity', (
+												(!$.Match.isNum(this.alpha) ? this.alpha.fill : this.alpha) / 100
+											));
+											owner.svg2d.setAttribute('stroke', this.color);
+											owner.svg2d.setAttribute('stroke-width', this.thick);
+											owner.svg2d.setAttribute('stroke-opacity', (
+												(!$.Match.isNum(this.alpha) ? this.alpha.ctur : this.alpha) / 100
+											));
 											owner.svg2d.setAttribute('stroke-dasharray', skill.styleTo(this.style, this.thick));
 											if(!trans){
 												owner.svg2d.removeAttribute('transform');
@@ -492,7 +524,7 @@
 												owner.svg2d.setAttribute('transform', trans);
 											}
 										}else{
-											owner.run2d = !$.Fx.draw.call(wnd, scene, [$.Util.format(model.rect, [gpath, owner.ident, this.color, this.thick, this.alpha / 100, skill.styleTo(this.style, this.thick), this.matte ? 'none' : '', this.stuff || 'none'])], function(){
+											owner.run2d = !$.Fx.draw.call(wnd, scene, [$.Util.format(model.rect, [gpath, owner.ident, this.color, this.thick, (!$.Match.isNum(this.alpha) ? this.alpha.ctur : this.alpha) / 100, skill.styleTo(this.style, this.thick), this.matte ? 'none' : '', this.stuff || 'none', (!$.Match.isNum(this.alpha) ? this.alpha.fill : this.alpha) / 100])], function(){
 												if(!(owner.run2d = false) && (owner.svg2d = $.Array.pop($.Fn.css.call(scene, "." + owner.ident))) && trans)
 													owner.svg2d.setAttribute('transform', trans);
 											});
@@ -539,13 +571,18 @@
 										var gpath = (this.route || 0).length > 3 ? (new parse()).M($.Array.slice(this.route, 0, 2)).L($.Array.slice(this.route, 2)).Z().P() : _blank;
 										if(owner.svg2d && !(owner.svg2d.style.display = (this.matte ? 'none' : ''))){
 											owner.svg2d.setAttribute('d', gpath);
-											owner.svg2d.setAttribute('opacity', this.alpha / 100);
-											owner.svg2d.setAttribute('stroke-width', this.thick);
-											owner.svg2d.setAttribute('stroke', this.color);
 											owner.svg2d.setAttribute('fill', this.stuff || 'none');
+											owner.svg2d.setAttribute('fill-opacity', (
+												(!$.Match.isNum(this.alpha) ? this.alpha.fill : this.alpha) / 100
+											));
+											owner.svg2d.setAttribute('stroke', this.color);
+											owner.svg2d.setAttribute('stroke-width', this.thick);
+											owner.svg2d.setAttribute('stroke-opacity', (
+												(!$.Match.isNum(this.alpha) ? this.alpha.ctur : this.alpha) / 100
+											));
 											owner.svg2d.setAttribute('stroke-dasharray', skill.styleTo(this.style, this.thick));
 										}else{
-											owner.run2d = !$.Fx.draw.call(wnd, scene, [$.Util.format(model.poly, [gpath, owner.ident, this.color, this.thick, this.alpha / 100, skill.styleTo(this.style, this.thick), this.matte ? 'none' : '', this.stuff || 'none'])], function(){
+											owner.run2d = !$.Fx.draw.call(wnd, scene, [$.Util.format(model.poly, [gpath, owner.ident, this.color, this.thick, (!$.Match.isNum(this.alpha) ? this.alpha.ctur : this.alpha) / 100, skill.styleTo(this.style, this.thick), this.matte ? 'none' : '', this.stuff || 'none', (!$.Match.isNum(this.alpha) ? this.alpha.fill : this.alpha) / 100])], function(){
 												owner.run2d = ((owner.svg2d = $.Array.pop($.Fn.css.call(scene, "." + owner.ident))) && false);
 											});
 										}
@@ -603,10 +640,15 @@
 										);
 										if(owner.svg2d && !(owner.svg2d.style.display = (this.matte ? 'none' : ''))){
 											owner.svg2d.setAttribute('d', gpath);
-											owner.svg2d.setAttribute('opacity', this.alpha / 100);
-											owner.svg2d.setAttribute('stroke-width', this.thick);
-											owner.svg2d.setAttribute('stroke', this.color);
 											owner.svg2d.setAttribute('fill', this.stuff || 'none');
+											owner.svg2d.setAttribute('fill-opacity', (
+												(!$.Match.isNum(this.alpha) ? this.alpha.fill : this.alpha) / 100
+											));
+											owner.svg2d.setAttribute('stroke', this.color);
+											owner.svg2d.setAttribute('stroke-width', this.thick);
+											owner.svg2d.setAttribute('stroke-opacity', (
+												(!$.Match.isNum(this.alpha) ? this.alpha.ctur : this.alpha) / 100
+											));
 											owner.svg2d.setAttribute('stroke-dasharray', skill.styleTo(this.style, this.thick));
 											if(!trans){
 												owner.svg2d.removeAttribute('transform');
@@ -614,7 +656,7 @@
 												owner.svg2d.setAttribute('transform', trans);
 											}
 										}else{
-											owner.run2d = !$.Fx.draw.call(wnd, scene, [$.Util.format(model.oval, [gpath, owner.ident, this.color, this.thick, this.alpha / 100, skill.styleTo(this.style, this.thick), this.matte ? 'none' : '', this.stuff || 'none'])], function(){
+											owner.run2d = !$.Fx.draw.call(wnd, scene, [$.Util.format(model.oval, [gpath, owner.ident, this.color, this.thick, (!$.Match.isNum(this.alpha) ? this.alpha.ctur : this.alpha) / 100, skill.styleTo(this.style, this.thick), this.matte ? 'none' : '', this.stuff || 'none', (!$.Match.isNum(this.alpha) ? this.alpha.fill : this.alpha) / 100])], function(){
 												if(!(owner.run2d = false) && (owner.svg2d = $.Array.pop($.Fn.css.call(scene, "." + owner.ident))) && trans)
 													owner.svg2d.setAttribute('transform', trans);
 											});
@@ -678,10 +720,15 @@
 										);
 										if(owner.svg2d && !(owner.svg2d.style.display = (this.matte ? 'none' : ''))){
 											owner.svg2d.setAttribute('d', gpath);
-											owner.svg2d.setAttribute('opacity', this.alpha / 100);
-											owner.svg2d.setAttribute('stroke-width', this.thick);
-											owner.svg2d.setAttribute('stroke', this.color);
 											owner.svg2d.setAttribute('fill', this.stuff || 'none');
+											owner.svg2d.setAttribute('fill-opacity', (
+												(!$.Match.isNum(this.alpha) ? this.alpha.fill : this.alpha) / 100
+											));
+											owner.svg2d.setAttribute('stroke', this.color);
+											owner.svg2d.setAttribute('stroke-width', this.thick);
+											owner.svg2d.setAttribute('stroke-opacity', (
+												(!$.Match.isNum(this.alpha) ? this.alpha.ctur : this.alpha) / 100
+											));
 											owner.svg2d.setAttribute('stroke-dasharray', skill.styleTo(this.style, this.thick));
 											if(!trans){
 												owner.svg2d.removeAttribute('transform');
@@ -689,7 +736,7 @@
 												owner.svg2d.setAttribute('transform', trans);
 											}
 										}else{
-											owner.run2d = !$.Fx.draw.call(wnd, scene, [$.Util.format(model.arch, [gpath, owner.ident, this.color, this.thick, this.alpha / 100, skill.styleTo(this.style, this.thick), this.matte ? 'none' : '', this.stuff || 'none'])], function(){
+											owner.run2d = !$.Fx.draw.call(wnd, scene, [$.Util.format(model.arch, [gpath, owner.ident, this.color, this.thick, (!$.Match.isNum(this.alpha) ? this.alpha.ctur : this.alpha) / 100, skill.styleTo(this.style, this.thick), this.matte ? 'none' : '', this.stuff || 'none', (!$.Match.isNum(this.alpha) ? this.alpha.fill : this.alpha) / 100])], function(){
 												if(!(owner.run2d = false) && (owner.svg2d = $.Array.pop($.Fn.css.call(scene, "." + owner.ident))) && trans)
 													owner.svg2d.setAttribute('transform', trans);
 											});
@@ -738,11 +785,13 @@
 											owner.svg2d.setAttribute('d', gpath);
 											owner.svg2d.setAttribute('stroke', this.color);
 											owner.svg2d.setAttribute('stroke-width', this.thick);
-											owner.svg2d.setAttribute('opacity', this.alpha / 100);
-											owner.svg2d.setAttribute('marker-end', this.arrow && gplug ? 'url(#' + owner.ident + ')' : '');
+											owner.svg2d.setAttribute('stroke-opacity', (
+												(!$.Match.isNum(this.alpha) ? this.alpha.ctur : this.alpha) / 100
+											));
 											owner.svg2d.setAttribute('stroke-dasharray', skill.styleTo(this.style, this.thick));
+											owner.svg2d.setAttribute('marker-end', this.arrow && gplug ? 'url(#' + owner.ident + ')' : '');
 										}else{
-											owner.run2d = !$.Fx.draw.call(wnd, scene, [$.Util.format(model.wave, [gpath, owner.ident, this.color, this.thick, this.alpha / 100, skill.styleTo(this.style, this.thick), this.matte ? 'none' : ''])], function(){
+											owner.run2d = !$.Fx.draw.call(wnd, scene, [$.Util.format(model.wave, [gpath, owner.ident, this.color, this.thick, (!$.Match.isNum(this.alpha) ? this.alpha.ctur : this.alpha) / 100, skill.styleTo(this.style, this.thick), this.matte ? 'none' : ''])], function(){
 												if(owner.svg2d = $.Array.pop($.Fn.css.call(scene, "." + owner.ident)))
 													$.Fx.draw.call(wnd, quote, [$.Util.format(model.mark, [owner.ident, this.color])], function(){
 														if(!(owner.run2d = false) && !this.matte && this.arrow && gplug)
@@ -759,12 +808,12 @@
 		}(function(){
 			this.save = [];
 		}, {
-			line : '<path d="$1" class="$2" stroke="$3" stroke-width="$4" opacity="$5" stroke-dasharray="$6" style="display:$7;" fill="none"></path>',
-			rect : '<path d="$1" class="$2" stroke="$3" stroke-width="$4" opacity="$5" stroke-dasharray="$6" style="display:$7;" fill="$8"></path>',
-			poly : '<path d="$1" class="$2" stroke="$3" stroke-width="$4" opacity="$5" stroke-dasharray="$6" style="display:$7;" fill="$8"></path>',
-			oval : '<path d="$1" class="$2" stroke="$3" stroke-width="$4" opacity="$5" stroke-dasharray="$6" style="display:$7;" fill="$8"></path>',
-			arch : '<path d="$1" class="$2" stroke="$3" stroke-width="$4" opacity="$5" stroke-dasharray="$6" style="display:$7;" fill="$8"></path>',
-			wave : '<path d="$1" class="$2" stroke="$3" stroke-width="$4" opacity="$5" stroke-dasharray="$6" style="display:$7;" fill="none"></path>',
+			line : '<path d="$1" class="$2" stroke="$3" stroke-width="$4" stroke-opacity="$5" stroke-dasharray="$6" style="display:$7;" fill="none"></path>',
+			rect : '<path d="$1" class="$2" stroke="$3" stroke-width="$4" stroke-opacity="$5" stroke-dasharray="$6" style="display:$7;" fill="$8" fill-opacity="$9"></path>',
+			poly : '<path d="$1" class="$2" stroke="$3" stroke-width="$4" stroke-opacity="$5" stroke-dasharray="$6" style="display:$7;" fill="$8" fill-opacity="$9"></path>',
+			oval : '<path d="$1" class="$2" stroke="$3" stroke-width="$4" stroke-opacity="$5" stroke-dasharray="$6" style="display:$7;" fill="$8" fill-opacity="$9"></path>',
+			arch : '<path d="$1" class="$2" stroke="$3" stroke-width="$4" stroke-opacity="$5" stroke-dasharray="$6" style="display:$7;" fill="$8" fill-opacity="$9"></path>',
+			wave : '<path d="$1" class="$2" stroke="$3" stroke-width="$4" stroke-opacity="$5" stroke-dasharray="$6" style="display:$7;" fill="none"></path>',
 			mark : '<marker id="$1" markerHeight="3" markerWidth="3" orient="auto" refX="1.5" refY="1.5"><use xlink:href="#arrow-classic" transform="rotate(180 1.5 1.5) scale(0.6,0.6)" stroke-width="1.6667" fill="$2" stroke="none"></use></marker>'
 		}) : (
 			$.Support.graphic.cav ? function(wnd, doc, cnv, can){
@@ -1259,7 +1308,7 @@
 										owner.cav2d.save();
 										owner.mir2d.save();
 										owner.mir2d.lineWidth = (owner.cav2d.lineWidth = this.thick);
-										owner.cav2d.globalAlpha = this.alpha / 100;
+										owner.cav2d.globalAlpha = (!$.Match.isNum(this.alpha) ? this.alpha.ctur : this.alpha) / 100;
 										owner.cav2d.strokeStyle = this.color;
 										owner.mir2d.strokeStyle = owner.ident;
 										owner.cav2d.stroke();
@@ -1274,7 +1323,7 @@
 											owner.cav2d.save();
 											owner.mir2d.save();
 											owner.mir2d.lineWidth = (owner.cav2d.lineWidth = this.thick);
-											owner.cav2d.globalAlpha = this.alpha / 100;
+											owner.cav2d.globalAlpha = (!$.Match.isNum(this.alpha) ? this.alpha.ctur : this.alpha) / 100;
 											owner.cav2d.strokeStyle = this.color;
 											owner.cav2d.fillStyle = this.color;
 											owner.mir2d.strokeStyle = owner.ident;
@@ -1363,7 +1412,7 @@
 											owner.cav2d.save();
 											owner.mir2d.save();
 											owner.mir2d.lineWidth = (owner.cav2d.lineWidth = this.thick);
-											owner.cav2d.globalAlpha = this.alpha / 100;
+											owner.cav2d.globalAlpha = (!$.Match.isNum(this.alpha) ? this.alpha.ctur : this.alpha) / 100;
 											owner.cav2d.strokeStyle = this.color;
 											owner.mir2d.strokeStyle = owner.ident;
 											owner.cav2d.stroke();
@@ -1391,7 +1440,7 @@
 												}
 												owner.cav2d.save();
 												owner.mir2d.save();
-												owner.cav2d.globalAlpha = this.alpha / 100;
+												owner.cav2d.globalAlpha = (!$.Match.isNum(this.alpha) ? this.alpha.fill : this.alpha) / 100;
 												owner.cav2d.fillStyle = this.stuff;
 												owner.mir2d.fillStyle = owner.ident;
 												owner.cav2d.fill();
@@ -1463,7 +1512,7 @@
 										owner.cav2d.save();
 										owner.mir2d.save();
 										owner.mir2d.lineWidth = (owner.cav2d.lineWidth = this.thick);
-										owner.cav2d.globalAlpha = this.alpha / 100;
+										owner.cav2d.globalAlpha = (!$.Match.isNum(this.alpha) ? this.alpha.ctur : this.alpha) / 100;
 										owner.cav2d.strokeStyle = this.color;
 										owner.mir2d.strokeStyle = owner.ident;
 										owner.cav2d.stroke();
@@ -1491,7 +1540,7 @@
 											}
 											owner.cav2d.save();
 											owner.mir2d.save();
-											owner.cav2d.globalAlpha = this.alpha / 100;
+											owner.cav2d.globalAlpha = (!$.Match.isNum(this.alpha) ? this.alpha.fill : this.alpha) / 100;
 											owner.cav2d.fillStyle = this.stuff;
 											owner.mir2d.fillStyle = owner.ident;
 											owner.cav2d.fill();
@@ -1572,7 +1621,7 @@
 											owner.cav2d.save();
 											owner.mir2d.save();
 											owner.mir2d.lineWidth = (owner.cav2d.lineWidth = this.thick);
-											owner.cav2d.globalAlpha = this.alpha / 100;
+											owner.cav2d.globalAlpha = (!$.Match.isNum(this.alpha) ? this.alpha.ctur : this.alpha) / 100;
 											owner.cav2d.strokeStyle = this.color;
 											owner.mir2d.strokeStyle = owner.ident;
 											owner.cav2d.stroke();
@@ -1598,7 +1647,7 @@
 												}
 												owner.cav2d.save();
 												owner.mir2d.save();
-												owner.cav2d.globalAlpha = this.alpha / 100;
+												owner.cav2d.globalAlpha = (!$.Match.isNum(this.alpha) ? this.alpha.fill : this.alpha) / 100;
 												owner.cav2d.fillStyle = this.stuff;
 												owner.mir2d.fillStyle = owner.ident;
 												owner.cav2d.fill();
@@ -1687,7 +1736,7 @@
 											owner.cav2d.save();
 											owner.mir2d.save();
 											owner.mir2d.lineWidth = (owner.cav2d.lineWidth = this.thick);
-											owner.cav2d.globalAlpha = this.alpha / 100;
+											owner.cav2d.globalAlpha = (!$.Match.isNum(this.alpha) ? this.alpha.ctur : this.alpha) / 100;
 											owner.cav2d.strokeStyle = this.color;
 											owner.mir2d.strokeStyle = owner.ident;
 											owner.cav2d.stroke();
@@ -1717,7 +1766,7 @@
 												}
 												owner.cav2d.save();
 												owner.mir2d.save();
-												owner.cav2d.globalAlpha = this.alpha / 100;
+												owner.cav2d.globalAlpha = (!$.Match.isNum(this.alpha) ? this.alpha.fill : this.alpha) / 100;
 												owner.cav2d.fillStyle = this.stuff;
 												owner.mir2d.fillStyle = owner.ident;
 												owner.cav2d.fill();
@@ -1785,7 +1834,7 @@
 										owner.cav2d.save();
 										owner.mir2d.save();
 										owner.mir2d.lineWidth = (owner.cav2d.lineWidth = this.thick);
-										owner.cav2d.globalAlpha = this.alpha / 100;
+										owner.cav2d.globalAlpha = (!$.Match.isNum(this.alpha) ? this.alpha.ctur : this.alpha) / 100;
 										owner.cav2d.strokeStyle = this.color;
 										owner.mir2d.strokeStyle = owner.ident;
 										owner.cav2d.stroke();
@@ -1800,7 +1849,7 @@
 											owner.cav2d.save();
 											owner.mir2d.save();
 											owner.mir2d.lineWidth = (owner.cav2d.lineWidth = this.thick);
-											owner.cav2d.globalAlpha = this.alpha / 100;
+											owner.cav2d.globalAlpha = (!$.Match.isNum(this.alpha) ? this.alpha.ctur : this.alpha) / 100;
 											owner.cav2d.strokeStyle = this.color;
 											owner.cav2d.fillStyle = this.color;
 											owner.mir2d.strokeStyle = owner.ident;
@@ -2077,10 +2126,10 @@
 													owner.vml2d.write.color = this.color;
 													owner.vml2d.write.weight = this.thick;
 													owner.vml2d.write.dashstyle = this.style;
-													owner.vml2d.write.opacity = this.alpha / 100;
+													owner.vml2d.write.opacity = (!$.Match.isNum(this.alpha) ? this.alpha.ctur : this.alpha) / 100;
 													owner.vml2d.write.endarrow = this.arrow ? 'classic' : 'none';
 												}else{
-													owner.run2d = !$.Fx.draw.call(wnd, scene, [$.Util.format(model.line, [gpath, owner.ident, this.color, this.thick, this.alpha / 100, this.style, this.arrow ? 'classic' : 'none', this.matte ? 'none' : ''])], function(){
+													owner.run2d = !$.Fx.draw.call(wnd, scene, [$.Util.format(model.line, [gpath, owner.ident, this.color, this.thick, (!$.Match.isNum(this.alpha) ? this.alpha.ctur : this.alpha) / 100, this.style, this.arrow ? 'classic' : 'none', this.matte ? 'none' : ''])], function(){
 														if(!(owner.run2d = false) && (owner.vml2d = $.Array.pop($.Fn.css.call(scene, "." + owner.ident))))
 															owner.vml2d.write = $.Dom.getFore(owner.vml2d);
 													});
@@ -2145,7 +2194,13 @@
 													owner.vml2d.write.color = this.color;
 													owner.vml2d.write.weight = this.thick;
 													owner.vml2d.write.dashstyle = this.style;
-													owner.vml2d.stuff.opacity = owner.vml2d.write.opacity = this.alpha / 100;
+													if($.Match.isNum(this.alpha)){
+														owner.vml2d.write.opacity = this.alpha;
+														owner.vml2d.stuff.opacity = this.alpha;
+													}else{
+														owner.vml2d.write.opacity = this.alpha.ctur;
+														owner.vml2d.stuff.opacity = this.alpha.fill;
+													}
 													if(owner.vml2d.slope.on = !!trans){
 														owner.vml2d.slope.offset = trans.offset(true);
 														owner.vml2d.slope.matrix = trans.matrix(true);
@@ -2154,7 +2209,7 @@
 														owner.vml2d.slope.removeAttribute('matrix');
 													}
 												}else{
-													owner.run2d = !$.Fx.draw.call(wnd, scene, [$.Util.format(model.rect, [gpath, owner.ident, this.color, this.thick, this.alpha / 100, this.style, !!this.stuff, this.stuff || '', this.matte ? 'none' : ''])], function(){
+													owner.run2d = !$.Fx.draw.call(wnd, scene, [$.Util.format(model.rect, [gpath, owner.ident, this.color, this.thick, (!$.Match.isNum(this.alpha) ? this.alpha.ctur : this.alpha) / 100, this.style, !!this.stuff, this.stuff || '', this.matte ? 'none' : '', (!$.Match.isNum(this.alpha) ? this.alpha.fill : this.alpha) / 100])], function(){
 														if((owner.vml2d = $.Array.pop($.Fn.css.call(scene, "." + owner.ident))) && (owner.vml2d.write = $.Dom.getPrev(owner.vml2d.stuff = $.Dom.getLast(owner.vml2d))))
 															$.Fx.draw.call(wnd, owner.vml2d, [model.skew], function(){
 																if(!(owner.run2d = false) && (owner.vml2d.slope = $.Dom.getLast(owner.vml2d)) && (owner.vml2d.slope.on = !!trans)){
@@ -2212,9 +2267,15 @@
 													owner.vml2d.write.color = this.color;
 													owner.vml2d.write.weight = this.thick;
 													owner.vml2d.write.dashstyle = this.style;
-													owner.vml2d.stuff.opacity = owner.vml2d.write.opacity = this.alpha / 100;
+													if($.Match.isNum(this.alpha)){
+														owner.vml2d.write.opacity = this.alpha;
+														owner.vml2d.stuff.opacity = this.alpha;
+													}else{
+														owner.vml2d.write.opacity = this.alpha.ctur;
+														owner.vml2d.stuff.opacity = this.alpha.fill;
+													}
 												}else{
-													owner.run2d = !$.Fx.draw.call(wnd, scene, [$.Util.format(model.poly, [gpath, owner.ident, this.color, this.thick, this.alpha / 100, this.style, !!this.stuff, this.stuff || '', this.matte ? 'none' : ''])], function(){
+													owner.run2d = !$.Fx.draw.call(wnd, scene, [$.Util.format(model.poly, [gpath, owner.ident, this.color, this.thick, (!$.Match.isNum(this.alpha) ? this.alpha.ctur : this.alpha) / 100, this.style, !!this.stuff, this.stuff || '', this.matte ? 'none' : '', (!$.Match.isNum(this.alpha) ? this.alpha.fill : this.alpha) / 100])], function(){
 														if(!(owner.run2d = false) && (owner.vml2d = $.Array.pop($.Fn.css.call(scene, "." + owner.ident))))
 															owner.vml2d.write = $.Dom.getPrev(owner.vml2d.stuff = $.Dom.getLast(owner.vml2d));
 													});
@@ -2279,7 +2340,13 @@
 													owner.vml2d.write.color = this.color;
 													owner.vml2d.write.weight = this.thick;
 													owner.vml2d.write.dashstyle = this.style;
-													owner.vml2d.stuff.opacity = owner.vml2d.write.opacity = this.alpha / 100;
+													if($.Match.isNum(this.alpha)){
+														owner.vml2d.write.opacity = this.alpha;
+														owner.vml2d.stuff.opacity = this.alpha;
+													}else{
+														owner.vml2d.write.opacity = this.alpha.ctur;
+														owner.vml2d.stuff.opacity = this.alpha.fill;
+													}
 													if(owner.vml2d.slope.on = !!trans){
 														owner.vml2d.slope.offset = trans.offset(true);
 														owner.vml2d.slope.matrix = trans.matrix(true);
@@ -2288,7 +2355,7 @@
 														owner.vml2d.slope.removeAttribute('matrix');
 													}
 												}else{
-													owner.run2d = !$.Fx.draw.call(wnd, scene, [$.Util.format(model.oval, [gpath, owner.ident, this.color, this.thick, this.alpha / 100, this.style, !!this.stuff, this.stuff || '', this.matte ? 'none' : ''])], function(){
+													owner.run2d = !$.Fx.draw.call(wnd, scene, [$.Util.format(model.oval, [gpath, owner.ident, this.color, this.thick, (!$.Match.isNum(this.alpha) ? this.alpha.ctur : this.alpha) / 100, this.style, !!this.stuff, this.stuff || '', this.matte ? 'none' : '', (!$.Match.isNum(this.alpha) ? this.alpha.fill : this.alpha) / 100])], function(){
 														if((owner.vml2d = $.Array.pop($.Fn.css.call(scene, "." + owner.ident))) && (owner.vml2d.write = $.Dom.getPrev(owner.vml2d.stuff = $.Dom.getLast(owner.vml2d))))
 															$.Fx.draw.call(wnd, owner.vml2d, [model.skew], function(){
 																if(!(owner.run2d = false) && (owner.vml2d.slope = $.Dom.getLast(owner.vml2d)) && (owner.vml2d.slope.on = !!trans)){
@@ -2363,7 +2430,13 @@
 													owner.vml2d.write.color = this.color;
 													owner.vml2d.write.weight = this.thick;
 													owner.vml2d.write.dashstyle = this.style;
-													owner.vml2d.stuff.opacity = owner.vml2d.write.opacity = this.alpha / 100;
+													if($.Match.isNum(this.alpha)){
+														owner.vml2d.write.opacity = this.alpha;
+														owner.vml2d.stuff.opacity = this.alpha;
+													}else{
+														owner.vml2d.write.opacity = this.alpha.ctur;
+														owner.vml2d.stuff.opacity = this.alpha.fill;
+													}
 													if(owner.vml2d.slope.on = !!trans){
 														owner.vml2d.slope.offset = trans.offset(true);
 														owner.vml2d.slope.matrix = trans.matrix(true);
@@ -2372,7 +2445,7 @@
 														owner.vml2d.slope.removeAttribute('matrix');
 													}
 												}else{
-													owner.run2d = !$.Fx.draw.call(wnd, scene, [$.Util.format(model.arch, [gpath, owner.ident, this.color, this.thick, this.alpha / 100, this.style, !!this.stuff, this.stuff || '', this.matte ? 'none' : ''])], function(){
+													owner.run2d = !$.Fx.draw.call(wnd, scene, [$.Util.format(model.arch, [gpath, owner.ident, this.color, this.thick, (!$.Match.isNum(this.alpha) ? this.alpha.ctur : this.alpha) / 100, this.style, !!this.stuff, this.stuff || '', this.matte ? 'none' : '', (!$.Match.isNum(this.alpha) ? this.alpha.fill : this.alpha) / 100])], function(){
 														if((owner.vml2d = $.Array.pop($.Fn.css.call(scene, "." + owner.ident))) && (owner.vml2d.write = $.Dom.getPrev(owner.vml2d.stuff = $.Dom.getLast(owner.vml2d))))
 															$.Fx.draw.call(wnd, owner.vml2d, [model.skew], function(){
 																if(!(owner.run2d = false) && (owner.vml2d.slope = $.Dom.getLast(owner.vml2d)) && (owner.vml2d.slope.on = !!trans)){
@@ -2427,10 +2500,10 @@
 													owner.vml2d.write.color = this.color;
 													owner.vml2d.write.weight = this.thick;
 													owner.vml2d.write.dashstyle = this.style;
-													owner.vml2d.write.opacity = this.alpha / 100;
+													owner.vml2d.write.opacity = (!$.Match.isNum(this.alpha) ? this.alpha.ctur : this.alpha) / 100;
 													owner.vml2d.write.endarrow = this.arrow ? 'classic' : 'none';
 												}else{
-													owner.run2d = !$.Fx.draw.call(wnd, scene, [$.Util.format(model.wave, [gpath, owner.ident, this.color, this.thick, this.alpha / 100, this.style, this.arrow ? 'classic' : 'none', this.matte ? 'none' : ''])], function(){
+													owner.run2d = !$.Fx.draw.call(wnd, scene, [$.Util.format(model.wave, [gpath, owner.ident, this.color, this.thick, (!$.Match.isNum(this.alpha) ? this.alpha.ctur : this.alpha) / 100, this.style, this.arrow ? 'classic' : 'none', this.matte ? 'none' : ''])], function(){
 														if(!(owner.run2d = false) && (owner.vml2d = $.Array.pop($.Fn.css.call(scene, "." + owner.ident))))
 															owner.vml2d.write = $.Dom.getFore(owner.vml2d);
 													});
@@ -2445,10 +2518,10 @@
 					this.save = [];
 				}, {
 					line : '<v:shape coordsize="1,1" style="width:1px;height:1px;display:$8;" path="$1" class="$2"><v:stroke color="$3" weight="$4" opacity="$5" dashstyle="$6" endarrow="$7"></v:stroke><v:fill on="f"></v:fill></v:shape>',
-					rect : '<v:shape coordsize="1,1" style="width:1px;height:1px;display:$9;" path="$1" class="$2"><v:stroke color="$3" weight="$4" opacity="$5" dashstyle="$6" endarrow="none"></v:stroke><v:fill on="$7" color="$8" opacity="$5"></v:fill></v:shape>',
-					poly : '<v:shape coordsize="1,1" style="width:1px;height:1px;display:$9;" path="$1" class="$2"><v:stroke color="$3" weight="$4" opacity="$5" dashstyle="$6" endarrow="none"></v:stroke><v:fill on="$7" color="$8" opacity="$5"></v:fill></v:shape>',
-					oval : '<v:shape coordsize="1,1" style="width:1px;height:1px;display:$9;" path="$1" class="$2"><v:stroke color="$3" weight="$4" opacity="$5" dashstyle="$6" endarrow="none"></v:stroke><v:fill on="$7" color="$8" opacity="$5"></v:fill></v:shape>',
-					arch : '<v:shape coordsize="1,1" style="width:1px;height:1px;display:$9;" path="$1" class="$2"><v:stroke color="$3" weight="$4" opacity="$5" dashstyle="$6" endarrow="none"></v:stroke><v:fill on="$7" color="$8" opacity="$5"></v:fill></v:shape>',
+					rect : '<v:shape coordsize="1,1" style="width:1px;height:1px;display:$9;" path="$1" class="$2"><v:stroke color="$3" weight="$4" opacity="$5" dashstyle="$6" endarrow="none"></v:stroke><v:fill on="$7" color="$8" opacity="$10"></v:fill></v:shape>',
+					poly : '<v:shape coordsize="1,1" style="width:1px;height:1px;display:$9;" path="$1" class="$2"><v:stroke color="$3" weight="$4" opacity="$5" dashstyle="$6" endarrow="none"></v:stroke><v:fill on="$7" color="$8" opacity="$10"></v:fill></v:shape>',
+					oval : '<v:shape coordsize="1,1" style="width:1px;height:1px;display:$9;" path="$1" class="$2"><v:stroke color="$3" weight="$4" opacity="$5" dashstyle="$6" endarrow="none"></v:stroke><v:fill on="$7" color="$8" opacity="$10"></v:fill></v:shape>',
+					arch : '<v:shape coordsize="1,1" style="width:1px;height:1px;display:$9;" path="$1" class="$2"><v:stroke color="$3" weight="$4" opacity="$5" dashstyle="$6" endarrow="none"></v:stroke><v:fill on="$7" color="$8" opacity="$10"></v:fill></v:shape>',
 					wave : '<v:shape coordsize="1,1" style="width:1px;height:1px;display:$8;" path="$1" class="$2"><v:stroke color="$3" weight="$4" opacity="$5" dashstyle="$6" endarrow="$7"></v:stroke><v:fill on="f"></v:fill></v:shape>',
 					skew : '<v:skew on="f"></v:skew>'
 				}) : null
